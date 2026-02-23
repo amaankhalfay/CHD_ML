@@ -15,7 +15,21 @@ male = st.selectbox("Sex", ["Female", "Male"])
 male = 1 if male == "Male" else 0
 
 age = st.number_input("Age", 20, 100, 40)
-education = st.selectbox("Education Level (1-4)", [1,2,3,4])
+education = st.selectbox("Education Level", [
+    "Some High School",
+    "High School Graduate",
+    "Some College",
+    "College Graduate"
+])
+
+education_map = {
+    "Some High School": 1,
+    "High School Graduate": 2,
+    "Some College": 3,
+    "College Graduate": 4
+}
+
+education = education_map[education]
 
 currentSmoker = st.selectbox("Current Smoker", ["No", "Yes"])
 currentSmoker = 1 if currentSmoker == "Yes" else 0
