@@ -2,24 +2,55 @@ import streamlit as st
 import joblib
 import numpy as np
 
-# LOAD MODEL
+# LOAD MODEL + FEATURES
 model = joblib.load("CHD_Project/Model/chd_model.pkl")
+features = joblib.load("CHD_Project/Model/features.pkl")
 
 st.title("❤️ CHD Risk Prediction System")
+st.subheader("🩺 Enter Patient Details")
 
-st.write("Enter patient details:")
+# INPUTS (ALL FEATURES)
 
-# INPUTS
-age = st.number_input("Age", 20, 100)
-sysBP = st.number_input("Systolic BP")
-diaBP = st.number_input("Diastolic BP")
-chol = st.number_input("Cholesterol")
-glucose = st.number_input("Glucose")
-cigs = st.number_input("Cigarettes per day")
+male = st.selectbox("Sex", ["Female", "Male"])
+male = 1 if male == "Male" else 0
 
-# PREDICTION
+age = st.number_input("Age", 20, 100, 40)
+education = st.selectbox("Education Level (1-4)", [1,2,3,4])
+
+currentSmoker = st.selectbox("Current Smoker", ["No", "Yes"])
+currentSmoker = 1 if currentSmoker == "Yes" else 0
+
+cigsPerDay = st.number_input("Cigarettes per day", 0, 50, 0)
+
+BPMeds = st.selectbox("On BP Medication", ["No", "Yes"])
+BPMeds = 1 if BPMeds == "Yes" else 0
+
+prevalentStroke = st.selectbox("Stroke History", ["No", "Yes"])
+prevalentStroke = 1 if prevalentStroke == "Yes" else 0
+
+prevalentHyp = st.selectbox("Hypertension", ["No", "Yes"])
+prevalentHyp = 1 if prevalentHyp == "Yes" else 0
+
+diabetes = st.selectbox("Diabetes", ["No", "Yes"])
+diabetes = 1 if diabetes == "Yes" else 0
+
+totChol = st.number_input("Cholesterol", 100, 400, 200)
+
+sysBP = st.number_input("Systolic BP", 80, 200, 120)
+diaBP = st.number_input("Diastolic BP", 50, 130, 80)
+
+BMI = st.number_input("BMI", 15.0, 50.0, 25.0)
+
+heartRate = st.number_input("Heart Rate", 40, 120, 70)
+
+glucose = st.number_input("Glucose", 70, 300, 100)
+
+# PREDICT
 if st.button("Predict"):
-    input_data = np.array([[age, cigs, 0, 0, 0, 0, 0, sysBP, diaBP, 0, 0, glucose, 0, 0, 0]])
+
+    input_data = np.array([[male, age, education, currentSmoker, cigsPerDay,
+                            BPMeds, prevalentStroke, prevalentHyp, diabetes,
+                            totChol, sysBP, diaBP, BMI, heartRate, glucose]])
 
     prediction = model.predict(input_data)
 
