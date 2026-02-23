@@ -2,20 +2,30 @@ import streamlit as st
 import joblib
 import numpy as np
 
-# PAGE CONFIG
-st.set_page_config(page_title="CHD Prediction", page_icon="❤️", layout="centered")
+# -------------------- PAGE CONFIG --------------------
+st.set_page_config(
+    page_title="CHD Prediction",
+    page_icon="❤️",
+    layout="centered"
+)
 
-# LOAD MODEL + FEATURES
+# -------------------- LOAD MODEL --------------------
 model = joblib.load("CHD_Project/Model/chd_model.pkl")
 features = joblib.load("CHD_Project/Model/features.pkl")
 
-# HEADER
-st.markdown("<h1 style='text-align: center; color: #ff4b4b;'>❤️ CHD Risk Prediction</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Enter patient details to assess heart disease risk</p>", unsafe_allow_html=True)
+# -------------------- HEADER --------------------
+st.markdown(
+    "<h1 style='text-align: center; color: #ff4b4b;'>❤️ CHD Risk Prediction</h1>",
+    unsafe_allow_html=True
+)
+st.markdown(
+    "<p style='text-align: center;'>Enter patient details to assess 10-Year Coronary Heart Disease Risk</p>",
+    unsafe_allow_html=True
+)
 
 st.divider()
 
-# -------------------- BASIC INFO --------------------
+# ==================== BASIC INFORMATION ====================
 st.subheader("🧍 Basic Information")
 
 col1, col2 = st.columns(2)
@@ -24,12 +34,12 @@ with col1:
     male = st.selectbox("Sex", ["Female", "Male"])
     male = 1 if male == "Male" else 0
 
-    age = st.number_input("Age", 20, 100, 40)
+    age = st.number_input("Age", min_value=20, max_value=100, value=40)
 
     currentSmoker = st.selectbox("Current Smoker", ["No", "Yes"])
     currentSmoker = 1 if currentSmoker == "Yes" else 0
 
-    cigsPerDay = st.number_input("Cigarettes/day", 0, 50, 0)
+    cigsPerDay = st.number_input("Cigarettes per Day", min_value=0, max_value=50, value=0)
 
 with col2:
     BPMeds = st.selectbox("BP Medication", ["No", "Yes"])
@@ -46,28 +56,28 @@ with col2:
 
 st.divider()
 
-# -------------------- CLINICAL DATA --------------------
+# ==================== CLINICAL DATA ====================
 st.subheader("🩺 Clinical Measurements")
 
 col3, col4 = st.columns(2)
 
 with col3:
-    totChol = st.number_input("Cholesterol", 100, 400, 200)
-    sysBP = st.number_input("Systolic BP", 80, 200, 120)
-    diaBP = st.number_input("Diastolic BP", 50, 130, 80)
+    totChol = st.number_input("Total Cholesterol (mg/dL)", 100, 400, 200)
+    sysBP = st.number_input("Systolic BP (mmHg)", 80, 200, 120)
+    diaBP = st.number_input("Diastolic BP (mmHg)", 50, 130, 80)
 
 with col4:
     BMI = st.number_input("BMI", 15.0, 50.0, 25.0)
-    heartRate = st.number_input("Heart Rate", 40, 120, 70)
-    glucose = st.number_input("Glucose", 70, 300, 100)
+    heartRate = st.number_input("Heart Rate (bpm)", 40, 120, 70)
+    glucose = st.number_input("Glucose (mg/dL)", 70, 300, 100)
 
 # -------------------- VALIDATION --------------------
 if sysBP < diaBP:
-    st.warning("⚠️ Systolic BP should be higher than Diastolic BP")
+    st.warning("⚠️ Systolic BP should be higher than Diastolic BP.")
 
 st.divider()
 
-# -------------------- PREDICTION --------------------
+# ==================== PREDICTION ====================
 if st.button("🔍 Predict CHD Risk", use_container_width=True):
 
     # Create input dictionary
@@ -88,16 +98,29 @@ if st.button("🔍 Predict CHD Risk", use_container_width=True):
         'glucose': glucose
     }
 
-    # Arrange input in correct feature order
+    # Arrange input in saved feature order
     input_data = np.array([[input_dict[feature] for feature in features]])
 
-    # Predict
-    prediction = model.predict(input_data)
+    # Predict probability
+    probability = model.predict_proba(input_data)[0][1]
 
     st.divider()
 
-    # Output
-    if prediction[0] == 1:
+    # Display probability
+    st.markdown(f"### 📊 Estimated 10-Year CHD Risk: **{round(probability * 100, 2)}%**")
+
+    # Custom medical threshold
+    if probability > 0.35:
         st.error("🚨 High Risk of Coronary Heart Disease")
     else:
         st.success("✅ Low Risk of Coronary Heart Disease")
+
+    # Optional interpretation
+    if probability <= 0.20:
+        st.info("🟢 Very Low Risk Profile")
+    elif probability <= 0.35:
+        st.info("🟡 Mild Risk – Maintain Healthy Lifestyle")
+    elif probability <= 0.60:
+        st.warning("🟠 Moderate Risk – Medical Consultation Recommended")
+    else:
+        st.error("🔴 Severe Risk – Immediate Medical Attention Advised")
