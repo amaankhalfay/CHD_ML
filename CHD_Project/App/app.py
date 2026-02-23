@@ -3,7 +3,7 @@ import joblib
 import numpy as np
 
 # LOAD MODEL
-model = joblib.load("../Model/chd_model.pkl")
+model = joblib.load("CHD_Project/Model/chd_model.pkl")
 
 st.title("❤️ CHD Risk Prediction System")
 
